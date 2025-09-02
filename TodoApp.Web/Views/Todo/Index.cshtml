@@ -1,0 +1,257 @@
+﻿@model TodoApp.Web.ViewModels.TodoIndexViewModel
+
+@{
+    ViewData["Title"] = "Todo List";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2><i class="fas fa-tasks me-2"></i>My Todos</h2>
+                <p class="text-muted mb-0">@Model.CurrentFilter</p>
+            </div>
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Add New Todo
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">@Model.Stats.TotalTodos</h4>
+                        <p class="mb-0">Total Todos</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-tasks fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">@Model.Stats.CompletedTodos</h4>
+                        <p class="mb-0">Completed</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">@Model.Stats.PendingTodos</h4>
+                        <p class="mb-0">Pending</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">@Model.Stats.OverdueTodos</h4>
+                        <p class="mb-0">Overdue</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Form -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-filter me-2"></i>Filter & Search
+            <button class="btn btn-outline-secondary btn-sm float-end" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+                <i class="fas fa-chevron-down"></i>
+            </button>
+        </h5>
+    </div>
+    <div class="collapse show" id="filterCollapse">
+        <div class="card-body">
+            <form asp-action="Index" method="get">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label asp-for="Filter.SearchTerm" class="form-label"></label>
+                        <input asp-for="Filter.SearchTerm" class="form-control" placeholder="Search todos..." />
+                    </div>
+                    <div class="col-md-2">
+                        <label asp-for="Filter.IsCompleted" class="form-label">Status</label>
+                        @Html.DropDownListFor(m => m.Filter.IsCompleted, Model.Filter.StatusOptions, new { @class = "form-select" })
+                    </div>
+                    <div class="col-md-2">
+                        <label asp-for="Filter.Priority" class="form-label">Priority</label>
+                        @Html.DropDownListFor(m => m.Filter.Priority, Model.Filter.PriorityOptions, new { @class = "form-select" })
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-check mt-4">
+                            <input asp-for="Filter.ShowOverdueOnly" class="form-check-input" />
+                            <label asp-for="Filter.ShowOverdueOnly" class="form-check-label"></label>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search me-1"></i>Filter
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary ms-1">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Todo List -->
+<div class="row">
+    @if (Model.Todos.Any())
+    {
+        @foreach (var todo in Model.Todos)
+        {
+                    <div class="col-md-6 mb-3">
+                        <div class="card @(todo.IsCompleted ? "border-success" : (todo.IsOverdue ? "border-danger" : "border-secondary"))">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title @(todo.IsCompleted ? "text-decoration-line-through text-muted" : "")">
+                                @todo.Title
+                                    </h5>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" asp-action="Details" asp-route-id="@todo.Id">
+                                                <i class="fas fa-eye me-1"></i>View Details
+                                            </a></li>
+                                            <li><a class="dropdown-item" asp-action="Edit" asp-route-id="@todo.Id">
+                                                <i class="fas fa-edit me-1"></i>Edit
+                                            </a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item text-danger" asp-action="Delete" asp-route-id="@todo.Id">
+                                                <i class="fas fa-trash me-1"></i>Delete
+                                            </a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                        @if (!string.IsNullOrWhiteSpace(todo.Description))
+                        {
+                                        <p class="card-text @(todo.IsCompleted ? "text-muted" : "")">@todo.Description</p>
+                        }
+
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <span class="badge @(todo.Priority switch 
+                                {
+                                    TodoApp.Data.Models.Priority.High => "bg-danger",
+                                    TodoApp.Data.Models.Priority.Medium => "bg-warning text-dark",
+                                    _ => "bg-success"
+                                })">
+                                    @todo.PriorityText
+                                        </span>
+
+                                        <span class="badge @(todo.IsCompleted ? "bg-success" : "bg-secondary") ms-1">
+                                    @todo.StatusText
+                                        </span>
+
+                                @if (todo.IsOverdue)
+                                {
+                                                <span class="badge bg-danger ms-1">
+                                                    <i class="fas fa-exclamation-triangle me-1"></i>Overdue
+                                                </span>
+                                }
+                                    </div>
+
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>@todo.DueDateText
+                                    </small>
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <small class="text-muted">
+                                        Created: @todo.CreatedAt.ToString("dd/MM/yyyy")
+                                    </small>
+
+                                    <button class="btn btn-sm @(todo.IsCompleted ? "btn-outline-warning" : "btn-outline-success")" 
+                                            onclick="toggleStatus(@todo.Id)">
+                                        <i class="fas @(todo.IsCompleted ? "fa-undo" : "fa-check") me-1"></i>
+                                @(todo.IsCompleted ? "Mark Pending" : "Mark Complete")
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+        }
+    }
+    else
+    {
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-5x text-muted mb-3"></i>
+                    <h4 class="text-muted">No todos found</h4>
+                    <p class="text-muted">@(string.IsNullOrWhiteSpace(Model.Filter.SearchTerm) ? "Start by creating your first todo!" : "Try adjusting your search filters.")</p>
+                    <a asp-action="Create" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>Create Your First Todo
+                    </a>
+                </div>
+            </div>
+    }
+</div>
+
+@section Scripts {
+        <script>
+            function toggleStatus(todoId) {
+                $.ajax({
+                    url: '@Url.Action("ToggleStatus", "Todo")',
+                    type: 'POST',
+                    data: { id: todoId },
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (result) {
+                        if (result.success) {
+                            location.reload();
+                        } else {
+                            alert('Error: ' + result.message);
+                        }
+                    },
+                    error: function () {
+                        alert('An error occurred while updating the todo status.');
+                    }
+                });
+            }
+
+            // Auto-submit form on filter change
+            $('.form-select').on('change', function() {
+                $(this).closest('form').submit();
+            });
+        </script>
+}
